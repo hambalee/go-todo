@@ -1,21 +1,18 @@
 package main
 
 import (
-	"encoding/json"
-	"log"
-	"net/http"
+	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	http.HandleFunc("/ping", pingpongHandler)
-	log.Fatal(http.ListenAndServe(":8000", nil))
+	r := gin.Default()
+	r.SetTrustedProxies([]string{"127.0.0.1"})
+	r.GET("/ping", pingpongHandler)
+	r.Run(":8080")
 }
 
-func pingpongHandler(w http.ResponseWriter, r *http.Request) {
-	resp := struct {
-		Message string `json:"message"`
-	}{
-		Message: "pong",
-	}
-	json.NewEncoder(w).Encode(&resp)
+func pingpongHandler(c *gin.Context) {
+	c.JSON(200, gin.H{
+		"message": "pong",
+	})
 }
