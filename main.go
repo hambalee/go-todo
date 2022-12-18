@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/hambalee/go-todo/todo"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -17,6 +18,8 @@ func main() {
 		panic("failed to connect database")
 	}
 
+	db.AutoMigrate(&todo.Todo{})
+
 	db.AutoMigrate(&User{})
 
 	db.Create(&User{Name: "Hello"})
@@ -28,7 +31,11 @@ func main() {
 
 	r.SetTrustedProxies([]string{"127.0.0.1"})
 	r.GET("/ping", pingpongHandler)
-	r.Run(":8080")
+
+	handler := todo.NewTodoHandler(db)
+	r.POST("/todos", handler.NewTask)
+
+	r.Run()
 }
 
 type UserHandler struct {
