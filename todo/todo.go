@@ -8,7 +8,7 @@ import (
 )
 
 type Todo struct {
-	Title string `json:"text"`
+	Title string `json:"text" binding:"required"`
 	gorm.Model
 }
 
