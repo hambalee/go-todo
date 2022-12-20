@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/hambalee/go-todo/auth"
 	"github.com/hambalee/go-todo/todo"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
@@ -34,6 +35,8 @@ func main() {
 
 	handler := todo.NewTodoHandler(db)
 	r.POST("/todos", handler.NewTask)
+
+	r.GET("/tokenz", auth.AccessToken)
 
 	r.Run()
 }
