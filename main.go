@@ -33,10 +33,12 @@ func main() {
 	r.SetTrustedProxies([]string{"127.0.0.1"})
 	r.GET("/ping", pingpongHandler)
 
-	handler := todo.NewTodoHandler(db)
-	r.POST("/todos", handler.NewTask)
+	r.GET("/tokenz", auth.AccessToken("==signature=="))
 
-	r.GET("/tokenz", auth.AccessToken)
+	protected := r.Group("", auth.Protect([]byte("==signature==")))
+
+	todoHandler := todo.NewTodoHandler(db)
+	protected.POST("/todos", todoHandler.NewTask)
 
 	r.Run()
 }
