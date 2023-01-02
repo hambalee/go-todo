@@ -1,9 +1,13 @@
 package main
 
 import (
+	"log"
+	"os"
+
 	"github.com/gin-gonic/gin"
 	"github.com/hambalee/go-todo/auth"
 	"github.com/hambalee/go-todo/todo"
+	"github.com/joho/godotenv"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
@@ -14,6 +18,11 @@ type User struct {
 }
 
 func main() {
+	err := godotenv.Load("local.env")
+	if err != nil {
+		log.Printf("please consider environment variable: %s", err)
+	}
+
 	db, err := gorm.Open(sqlite.Open("test.db"), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
@@ -33,9 +42,9 @@ func main() {
 	r.SetTrustedProxies([]string{"127.0.0.1"})
 	r.GET("/ping", pingpongHandler)
 
-	r.GET("/tokenz", auth.AccessToken("==signature=="))
+	r.GET("/tokenz", auth.AccessToken(os.Getenv("SIGN")))
 
-	protected := r.Group("", auth.Protect([]byte("==signature==")))
+	protected := r.Group("", auth.Protect([]byte(os.Getenv("SIGN"))))
 
 	todoHandler := todo.NewTodoHandler(db)
 	protected.POST("/todos", todoHandler.NewTask)
