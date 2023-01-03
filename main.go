@@ -2,7 +2,9 @@ package main
 
 import (
 	"log"
+	"net/http"
 	"os"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/hambalee/go-todo/auth"
@@ -50,6 +52,14 @@ func main() {
 	protected.POST("/todos", todoHandler.NewTask)
 
 	r.Run()
+
+	s := &http.Server{
+		Addr:           ":" + os.Getenv("PORT"),
+		Handler:        r,
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 1 << 20,
+	}
 }
 
 type UserHandler struct {
