@@ -18,6 +18,11 @@ import (
 	"gorm.io/gorm"
 )
 
+var (
+	buildcommit = "dev"
+	buildtime = time.Now().String()
+)
+
 type User struct {
 	gorm.Model
 	Name string
@@ -41,6 +46,12 @@ func main() {
 	db.Create(&User{Name: "Hello"})
 
 	r := gin.Default()
+	r.GET("/x", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"buildcommit": buildcommit,
+			"buildtime" : buildtime,
+		})
+	})
 
 	userHandler := UserHandler{db: db}
 	r.GET("/users", userHandler.User)
