@@ -29,7 +29,13 @@ type User struct {
 }
 
 func main() {
-	err := godotenv.Load("local.env")
+	_, err := os.Create("/tmp/live")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer os.Remove("/tmp/live")
+
+	err = godotenv.Load("local.env")
 	if err != nil {
 		log.Printf("please consider environment variable: %s", err)
 	}
@@ -46,6 +52,10 @@ func main() {
 	db.Create(&User{Name: "Hello"})
 
 	r := gin.Default()
+	r.GET("/healthz", func (c *gin.Context)  {
+		c.Status(200)
+	})
+	
 	r.GET("/x", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"buildcommit": buildcommit,

@@ -16,3 +16,8 @@ go build \
 -X main.buildtime=`date "+%Y-%m-%dT%H:%M:%S%Z:00"`" \
 -o app
 ```
+
+`cat /tmp/live`
+
+`echo $?`
+
