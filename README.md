@@ -10,6 +10,8 @@ go get -u github.com/gin-gonic/gin
 
 PORT=8081 go run main.go
 
+## ldflags
+
 ```
 go build \
 -ldflags "-X main.buildcommit=`git rev-parse --short HEAD` \
@@ -17,7 +19,11 @@ go build \
 -o app
 ```
 
+## Liveness Probe Readiness Probe
 `cat /tmp/live`
 
 `echo $?`
+
+## Rate Limit
+`echo "GET http://:8081/limitz" | vegeta attack -rate=10/s -duration=1s | vegeta report`
 

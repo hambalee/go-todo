@@ -14,13 +14,14 @@ import (
 	"github.com/hambalee/go-todo/auth"
 	"github.com/hambalee/go-todo/todo"
 	"github.com/joho/godotenv"
+	"golang.org/x/time/rate"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
 
 var (
 	buildcommit = "dev"
-	buildtime = time.Now().String()
+	buildtime   = time.Now().String()
 )
 
 type User struct {
@@ -52,14 +53,15 @@ func main() {
 	db.Create(&User{Name: "Hello"})
 
 	r := gin.Default()
-	r.GET("/healthz", func (c *gin.Context)  {
+	r.GET("/healthz", func(c *gin.Context) {
 		c.Status(200)
 	})
-	
+
+	r.GET("/limitz", limitedHandler)
 	r.GET("/x", func(c *gin.Context) {
 		c.JSON(200, gin.H{
 			"buildcommit": buildcommit,
-			"buildtime" : buildtime,
+			"buildtime":   buildtime,
 		})
 	})
 
@@ -97,7 +99,7 @@ func main() {
 	stop()
 	fmt.Println("shutting down gracefully, press Ctrl+C again to force")
 
-	timeoutCtx, cancel := context.WithTimeout(context.Background(), 5 * time.Second)
+	timeoutCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	if err := s.Shutdown(timeoutCtx); err != nil {
@@ -116,6 +118,18 @@ func (h *UserHandler) User(c *gin.Context) {
 }
 
 func pingpongHandler(c *gin.Context) {
+	c.JSON(200, gin.H{
+		"message": "pong",
+	})
+}
+
+var limiter = rate.NewLimiter(5, 5)
+
+func limitedHandler(c *gin.Context) {
+	if !limiter.Allow() {
+		c.AbortWithStatus(http.StatusTooManyRequests)
+		return
+	}
 	c.JSON(200, gin.H{
 		"message": "pong",
 	})
