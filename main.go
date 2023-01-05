@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/hambalee/go-todo/auth"
 	"github.com/hambalee/go-todo/todo"
@@ -53,6 +54,17 @@ func main() {
 	db.Create(&User{Name: "Hello"})
 
 	r := gin.Default()
+	config := cors.DefaultConfig()
+	config.AllowOrigins = []string{
+		"http://localhost:8080",
+	}
+	config.AllowHeaders = []string{
+		"Origin",
+		"Authorization",
+		"TransactionID",
+	}
+	r.Use(cors.New(config))
+
 	r.GET("/healthz", func(c *gin.Context) {
 		c.Status(200)
 	})
@@ -77,6 +89,8 @@ func main() {
 
 	todoHandler := todo.NewTodoHandler(db)
 	protected.POST("/todos", todoHandler.NewTask)
+	protected.GET("/todos", todoHandler.List)
+	protected.DELETE("/todos/:id", todoHandler.Remove)
 
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
